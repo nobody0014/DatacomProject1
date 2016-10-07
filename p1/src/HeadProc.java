@@ -2,8 +2,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 public class HeadProc {
-	
-	
 	//processed host and return only url, path, and port
 	public String[] procHost(String servName){
 		String[] arr = servName.split(":");
@@ -22,5 +20,12 @@ public class HeadProc {
 			toReturn[1] = arr[2].substring(toReturn[2].length(), arr[2].length());
 		}
 		return toReturn;
+	}
+	
+	
+	//ask the function to make http request according to the absURL
+	public String makeDownloadReq(String absUrl){
+		String req = "";
+		return req;
 	}
 }
