@@ -6,17 +6,23 @@ public class Downloader {
 	//global var that we will use
 	Socket client;	
 	String servName;
+	String path;
 	
 	//standard http port is 80
 	int port = 80;
 	
 	//Constructors
-	public Downloader(String servName){
+	public Downloader(String servName, String path){
 		this.servName = servName;
+		this.path = path;
 	}
-	public Downloader(String servName, int port){
-		this(servName);
+	public Downloader(String servName, String path,int port){
+		this(servName,path);
 		this.port = port;
+	}
+	public Downloader(String servName, String path,String port){
+		this(servName,path);
+		this.port = Integer.parseInt(port);
 	}
 	
 	//Make new socket and connect it, time out if doesnt work
