@@ -1,0 +1,21 @@
+#!/bin/bash
+clear
+echo “Starting script…”
+if [ $# -le 2 ]
+then
+	echo “Invalid Parameters”
+elif [ $# -ge 6 ]
+then
+	echo “Invalid Parameters”
+else 
+	echo “Valid range of Parameters, compiling the program…”
+	cd p1/src
+	echo “Compiling…”
+	javac srget.java
+	echo “Running the program…”
+	java srget $@
+	echo “Finished running the program…”
+	cd ..
+	cd ..
+fi
+echo “Done with script…”
