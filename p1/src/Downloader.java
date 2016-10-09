@@ -36,14 +36,16 @@ public class Downloader {
 	}
 	
 	//Reading input do 2 things, read the incoming files and writing into another file
+	//Write into other is done by initializing mod and using it
+	//Ending detection and header seperation will be done by mod
 	public void readInput(String fileName) throws IOException{
 		mod = new ModReader(fileName);
 		in = new DataInputStream(client.getInputStream());
 		byte[] currentData = new byte[8192];
 		int currentByte = 0;
-		
-		while(currentByte != -1){	
+		while(currentByte != -1 && currentByte != 0){	
 			currentByte = in.read(currentData);
+			System.out.println(currentByte);
 			if(mod.write(Arrays.copyOfRange(currentData, 0,currentByte))){
 				break;
 			}

@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Arrays;
 
 //Modified reader for easy purpose and shit
 public class ModReader {
@@ -18,6 +19,7 @@ public class ModReader {
 		raf = new RandomAccessFile(f, "r");
 	}
 	public boolean write(byte[] data) throws IOException{
+		System.out.print(new String(data));
 		if(!headerFound){
 			endDetector += new String(data);
 			if(endDetector.contains("\r\n\r\n")){
@@ -29,13 +31,17 @@ public class ModReader {
 		}
 		else{
 			out.write(data);
-			byte[] checkEnd = new byte[4];
-			raf.seek(f.length() - 4);
-			raf.read(checkEnd, 0, 4);
-			String check = new String(checkEnd);
-			if(check.equals("\r\n\r\n")){
-				return true;
-			}
+		}
+		return checkEnd();
+	}
+	public boolean checkEnd() throws IOException{
+		byte[] checkEnd = new byte[4];
+		raf.seek(f.length() - 4);
+		raf.read(checkEnd, 0, 4);
+		String check = new String(checkEnd);
+		System.out.println(Arrays.toString(checkEnd));
+		if(check.equals("\r\n\r\n")){
+			return true;
 		}
 		return false;
 	}
