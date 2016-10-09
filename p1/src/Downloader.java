@@ -7,6 +7,7 @@ public class Downloader {
 	Socket client;
 	DataInputStream in;
 	DataOutputStream out;
+	ModReader mod;
 	String domain;
 	String absUrl;
 	String path;
@@ -35,52 +36,20 @@ public class Downloader {
 	}
 	
 	//Reading input do 2 things, read the incoming files and writing into another file
-	public void readInput() throws IOException{
-		String response  = readHeader();
-		System.out.println(response);
-	}
-	public String readHeader() throws IOException{
-		String response = read();
-		String[] splitted  = response.split("\r\n\r\n");
-		//usually the first if statement would not happen since it would mean that we have read the entire header and body within 8192 bytes
-		//Which when we use split, would give us array of length 3 (1 header, 1 body, 1 empty)
-		if(splitted.length == 3){
-			return response;
-		}
-		else{
-			return response  + readBody();
-		}
-	}
-	public String readBody() throws IOException{
-		//This is called when the file is more than 8192 bytes, which happens most of the time.
-		String response = read();
-		return response;
-	}
-	public String read() throws IOException{
+	public void readInput(String fileName) throws IOException{
+		mod = new ModReader(fileName);
 		in = new DataInputStream(client.getInputStream());
 		byte[] currentData = new byte[8192];
 		int currentByte = 0;
-		int last = 0;
-		int totalSoFar = 0;
-		String response = "";
-		currentByte = in.read(currentData,last,8192-totalSoFar);
-		last = totalSoFar;
-		while(currentByte != -1 && currentByte != 0){			
-			totalSoFar += currentByte;
-			String incoming = new String(Arrays.copyOfRange(currentData, last, totalSoFar)); 
-			response += incoming;
-			if(response.contains("\r\n\r\n")){
+		
+		while(currentByte != -1){	
+			currentByte = in.read(currentData);
+			if(mod.write(Arrays.copyOfRange(currentData, 0,currentByte))){
 				break;
 			}
-			if(totalSoFar >= 8192){
-				currentData = new byte[8192];
-				totalSoFar = 0;
-			}
-			last = totalSoFar;
-			currentByte = in.read(currentData,last,8192-totalSoFar);
 		}
-		return response;
 	}
+
 	//Make new socket and connect it, time out if doesnt work
 	public void connect(){
 		try{

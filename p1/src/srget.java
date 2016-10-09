@@ -1,6 +1,5 @@
 import java.util.*;
 import java.io.*;
-import java.net.*;
 public class srget {
 	public static void main(String[] args) throws IOException{
 		System.out.println(Arrays.toString(args));
@@ -20,7 +19,7 @@ public class srget {
 		System.out.println("Sent req");
 		System.out.println("Reading Input");
 		
-		d.readInput(); //This function will both read and then write input immediately
+		d.readInput(args[1]); //This function will both read and then write input immediately
 		
 		System.out.println("Done reading");
 		System.out.println("Taking input");
