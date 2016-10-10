@@ -43,9 +43,8 @@ public class Downloader {
 		in = new DataInputStream(client.getInputStream());
 		byte[] currentData = new byte[8192];
 		int currentByte = 0;
-		while(currentByte != -1 && currentByte != 0){	
+		while(currentByte != -1){	
 			currentByte = in.read(currentData);
-			System.out.println(currentByte);
 			if(mod.write(Arrays.copyOfRange(currentData, 0,currentByte))){
 				break;
 			}

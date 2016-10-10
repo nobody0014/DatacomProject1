@@ -1,46 +1,62 @@
 import java.io.*;
-import java.util.Arrays;
+import java.util.*;
 
 //Modified reader for easy purpose and shit
 public class ModReader {
 	String fn;
-	String endDetector;
 	File f;
 	FileOutputStream out;
 	RandomAccessFile raf;
-	
 	boolean headerFound;
+	long contentLength;
+	
 	public ModReader(String fileName) throws IOException{
 		fn = fileName;
 		headerFound = false;
 		out = new FileOutputStream(fn);
 		f = new File(fn);
-		endDetector = new String();
 		raf = new RandomAccessFile(f, "r");
+		contentLength = Integer.MAX_VALUE;
 	}
+
+	//Writing into file using fileoutputstream which use byte[]
+	//header detection is done here
 	public boolean write(byte[] data) throws IOException{
-		System.out.print(new String(data));
 		if(!headerFound){
-			endDetector += new String(data);
+			String endDetector = new String(data);
 			if(endDetector.contains("\r\n\r\n")){
-				headerFound = true;
 				String[] split = endDetector.split("\r\n\r\n");
 				out.write(split[1].getBytes());
-				endDetector = new String();
+				extractContentLength(split[0]);
+				headerFound = true;
 			}
 		}
 		else{
-			out.write(data);
+			if(data.length + f.length() >= contentLength){
+				int l = (int) (contentLength - f.length());
+				out.write(data,0,l);	
+			}
+			else{
+				out.write(data);
+			}
 		}
 		return checkEnd();
 	}
+
+	//Done when all the header is found
+	public void extractContentLength(String header) throws IOException{
+		String[] hSplit = header.split("\r\n");
+		for(String s : hSplit){
+			if(s.contains("Content-Length")){
+				String[] cl = s.split(":");
+				contentLength = Integer.parseInt(cl[1].trim());
+			}
+		}
+	}
+
+	//We always let content length be max vlue first until we discover the contentLength sent back form the header or the file ends with /r/n/r/n
 	public boolean checkEnd() throws IOException{
-		byte[] checkEnd = new byte[4];
-		raf.seek(f.length() - 4);
-		raf.read(checkEnd, 0, 4);
-		String check = new String(checkEnd);
-		System.out.println(Arrays.toString(checkEnd));
-		if(check.equals("\r\n\r\n")){
+		if(f.length() >= contentLength){
 			return true;
 		}
 		return false;

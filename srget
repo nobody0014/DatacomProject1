@@ -12,6 +12,9 @@ else
 	cd p1/src
 	echo “Compiling…”
 	javac srget.java
+	javac Downloader.java
+	javac ModReader.java
+	javac HeadProc.java
 	echo “Running the program…”
 	java srget $@
 	echo “Finished running the program…”
