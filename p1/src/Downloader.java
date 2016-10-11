@@ -1,6 +1,7 @@
 import java.util.*;
 import java.io.*;
 import java.net.*;
+
 public class Downloader {
 	
 	//global var that we will use
@@ -14,13 +15,12 @@ public class Downloader {
 	HeadProc h;
 	int port = 80;
 	
-	//Constructors
-	public Downloader(String[] hostInfo,String absUrl){
-		domain = hostInfo[0];
-		path = hostInfo[1];
+	public Downloader(URL hostInfo,String absUrl){
+		domain = hostInfo.getHost();
+		path = hostInfo.getPath();
 		this.absUrl = absUrl;
-		if(hostInfo.length == 3){
-			port  = Integer.parseInt(hostInfo[2]);
+		if(hostInfo.getPort() != -1){
+			port  = hostInfo.getPort();
 		}
 	}
 	
@@ -41,11 +41,15 @@ public class Downloader {
 	public void readInput(String fileName) throws IOException{
 		mod = new ModReader(fileName);
 		in = new DataInputStream(client.getInputStream());
-		byte[] currentData = new byte[8192];
 		int currentByte = 0;
-		while(currentByte != -1){	
-			currentByte = in.read(currentData);
-			if(mod.write(Arrays.copyOfRange(currentData, 0,currentByte))){
+		byte[] currentData = new byte[8192];
+		while(currentByte != -1){
+			try{
+				currentByte = in.read(currentData);
+			}catch(Exception e){
+				System.out.println("Connection Timeout");
+			}
+			if(mod.write(currentData,currentByte)){
 				break;
 			}
 		}
@@ -56,6 +60,7 @@ public class Downloader {
 		try{
 			client = new Socket();
 			client.connect(new InetSocketAddress(domain, port), 3000);
+			client.setSoTimeout(5000);
 			System.out.println("Connection established");
 		}
 		catch (Exception e){

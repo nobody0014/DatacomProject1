@@ -1,11 +1,12 @@
 import java.util.*;
 import java.io.*;
+import java.net.*;
 public class srget {
 	public static void main(String[] args) throws IOException{
 		System.out.println(Arrays.toString(args));
 		checkArgs(args);
 		HeadProc h = new HeadProc();
-		String[] hostinfo = h.procHost(args[args.length-1]);
+		URL hostinfo = h.procHost(args[args.length-1]);
 		Downloader d = new Downloader(hostinfo,args[args.length-1]);
 		String makereq = h.makeDownloadReq(d.path, d.domain);
 		System.out.print(makereq);
