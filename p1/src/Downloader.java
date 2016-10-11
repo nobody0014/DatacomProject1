@@ -9,24 +9,27 @@ public class Downloader {
 	DataInputStream in;
 	DataOutputStream out;
 	ModReader mod;
+	URL hostInfo;
 	String domain;
-	String absUrl;
 	String path;
+	String fn;
 	HeadProc h;
 	int port = 80;
 	
-	public Downloader(URL hostInfo,String absUrl){
+	public Downloader(URL hostInfo,String fileName) throws IOException{
+		fn = fileName;
 		domain = hostInfo.getHost();
-		path = hostInfo.getPath();
-		this.absUrl = absUrl;
+		path = hostInfo.getPath();	
+		mod = new ModReader(fn);
 		if(hostInfo.getPort() != -1){
 			port  = hostInfo.getPort();
 		}
+		this.hostInfo = hostInfo;
 	}
 	
 	//Sending request out (this is a rather simple one)
 	public void sendReq(String req) throws IOException{
-		out = new DataOutputStream(client.getOutputStream());
+		
 		int reqS = req.length();
 		int sent = out.size();
 		while(sent < reqS){
@@ -38,9 +41,7 @@ public class Downloader {
 	//Reading input do 2 things, read the incoming files and writing into another file
 	//Write into other is done by initializing mod and using it
 	//Ending detection and header seperation will be done by mod
-	public void readInput(String fileName) throws IOException{
-		mod = new ModReader(fileName);
-		in = new DataInputStream(client.getInputStream());
+	public void download() throws IOException{
 		int currentByte = 0;
 		byte[] currentData = new byte[8192];
 		while(currentByte != -1){
@@ -49,18 +50,29 @@ public class Downloader {
 			}catch(Exception e){
 				System.out.println("Connection Timeout");
 			}
-			if(mod.write(currentData,currentByte)){
-				break;
-			}
+			//If just so that the server close and stop sending, end this connection
+			checkSuddenDis(currentByte);
+			if(mod.write(currentData,currentByte)){break;}
 		}
 	}
-
+	public void checkSuddenDis(int currentByte) throws IOException{
+		if(currentByte == -1){
+			System.out.println(currentByte);
+			mod.deleteFile();
+			mod.close();
+			System.out.println("Sudden disconnection from server, deleting the file and ending the program");
+			System.exit(0);
+		}
+	}
 	//Make new socket and connect it, time out if doesnt work
 	public void connect(){
 		try{
 			client = new Socket();
 			client.connect(new InetSocketAddress(domain, port), 3000);
 			client.setSoTimeout(5000);
+			out = new DataOutputStream(client.getOutputStream());
+			in = new DataInputStream(client.getInputStream());
+			
 			System.out.println("Connection established");
 		}
 		catch (Exception e){

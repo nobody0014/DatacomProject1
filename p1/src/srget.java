@@ -7,7 +7,7 @@ public class srget {
 		checkArgs(args);
 		HeadProc h = new HeadProc();
 		URL hostinfo = h.procHost(args[args.length-1]);
-		Downloader d = new Downloader(hostinfo,args[args.length-1]);
+		Downloader d = new Downloader(hostinfo,args[1]);
 		String makereq = h.makeDownloadReq(d.path, d.domain);
 		System.out.print(makereq);
 		System.out.println("connecting");
@@ -20,7 +20,7 @@ public class srget {
 		System.out.println("Sent req");
 		System.out.println("Reading Input");
 		
-		d.readInput(args[1]); //This function will both read and then write input immediately
+		d.download(); //This function will both read and then write input immediately
 		
 		System.out.println("Done reading");
 		System.out.println("Taking input");
