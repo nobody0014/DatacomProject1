@@ -14,4 +14,5 @@ if you don’t specify path, don’t worry we correct it for you
 Although if you don’t put http the program will complain.
 
 
-I have not comment on the parts that are used for chunk encoding,
+The chunk encoding part may be a bit bugging since i have no way to check it.
+Apologies
