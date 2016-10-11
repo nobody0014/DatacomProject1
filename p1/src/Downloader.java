@@ -19,7 +19,12 @@ public class Downloader {
 	public Downloader(URL hostInfo,String fileName) throws IOException{
 		fn = fileName;
 		domain = hostInfo.getHost();
-		path = hostInfo.getPath();	
+		if( hostInfo.getPath() == null || hostInfo.getPath().equals("")){
+			path = "/";
+		}
+		else{
+			path = hostInfo.getPath();
+		}
 		mod = new ModReader(fn);
 		if(hostInfo.getPort() != -1){
 			port  = hostInfo.getPort();
@@ -48,11 +53,20 @@ public class Downloader {
 			try{
 				currentByte = in.read(currentData);
 			}catch(Exception e){
-				timeOut();
+				checkFileDone();
 			}
 			//If just so that the server close and stop sending, end this connection
-			checkSuddenDis(currentByte);
+			if(!mod.getDoneReading()){checkSuddenDis(currentByte);}
+			else{break;}
 			if(mod.write(currentData,currentByte)){break;}
+		}
+	}
+	public void checkFileDone() throws IOException{
+		if((!mod.getCTE()) && mod.getCfl() == mod.getCL()){
+			System.out.println("Done receving the file");
+		}
+		else{
+			timeOut();
 		}
 	}
 	public void checkSuddenDis(int currentByte) throws IOException{
@@ -64,12 +78,15 @@ public class Downloader {
 			System.exit(0);
 		}
 	}
+	
+	
 	public void timeOut() throws IOException{
 		System.out.println("Connection Timeout");
 		System.out.println("Possible disconnection from server or the internet, deleting the file and ending the program");
 		mod.deleteFile();
 		mod.close();
 		System.exit(0);
+		
 	}
 	//Make new socket and connect it, time out if doesnt work
 	public void connect(){
