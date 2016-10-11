@@ -48,7 +48,7 @@ public class Downloader {
 			try{
 				currentByte = in.read(currentData);
 			}catch(Exception e){
-				System.out.println("Connection Timeout");
+				timeOut();
 			}
 			//If just so that the server close and stop sending, end this connection
 			checkSuddenDis(currentByte);
@@ -58,11 +58,18 @@ public class Downloader {
 	public void checkSuddenDis(int currentByte) throws IOException{
 		if(currentByte == -1){
 			System.out.println(currentByte);
+			System.out.println("Sudden disconnection from server, deleting the file and ending the program");
 			mod.deleteFile();
 			mod.close();
-			System.out.println("Sudden disconnection from server, deleting the file and ending the program");
 			System.exit(0);
 		}
+	}
+	public void timeOut() throws IOException{
+		System.out.println("Connection Timeout");
+		System.out.println("Possible disconnection from server or the internet, deleting the file and ending the program");
+		mod.deleteFile();
+		mod.close();
+		System.exit(0);
 	}
 	//Make new socket and connect it, time out if doesnt work
 	public void connect(){
