@@ -55,12 +55,15 @@ public class Downloader {
 			}catch(Exception e){
 				checkFileDone();
 			}
-			//If just so that the server close and stop sending, end this connection
+			//for checking if the whole file is sent yet but the connection ends
 			if(!mod.getDoneReading()){checkSuddenDis(currentByte);}
 			else{break;}
+			
+			//main writing method, it will return whether the file writing is done or not
 			if(mod.write(currentData,currentByte)){break;}
 		}
 	}
+	//For checking if the file sending is complete but the server still hang on to the connection
 	public void checkFileDone() throws IOException{
 		if((!mod.getCTE()) && mod.getCfl() == mod.getCL()){
 			System.out.println("Done receving the file");

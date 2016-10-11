@@ -51,8 +51,8 @@ public class ModReader {
 	//Write methods (only write will be called from other class)
 	
 	//Writing into file using fileoutputstream which use byte[]
-	//header detection is done here
 	public boolean write(byte[] data, int end) throws IOException{
+		//different write methods for different file encoding (normal and CTE)
 		if(getCTE()){
 			writeCTE(data,0,end);
 		}
@@ -63,6 +63,7 @@ public class ModReader {
 		return checkEnd();
 	}
 	
+	//This is just for normal writing and also to find the main header
 	public void writeNormal(byte[] data, int end) throws IOException{
 		if(!getHeaderFound()){
 			header.append(new String(Arrays.copyOfRange(data, 0, end),c));
@@ -74,12 +75,14 @@ public class ModReader {
 			addCfl(end);
 		}
 	}
+	//Writing for chunk encoding
 	public void writeCTE(byte[] data, int start, int end) throws IOException{
-//		System.out.println(start + " " + end + " " + Arrays.toString(data));
+		//The counter that keeps how much of toWrite we have to write into the file.
 		int c = 0;
+		//Create a tempt static byte array to keep bytes that should be written inside
 		byte[] toWrite = new byte[8192];
 		for(int i = start; i < end; i++){
-//			System.out.println(i);
+			//dontRead is a variable asking you to not read this byte.
 			if(getDontRead() == 0){
 				if(!getChunkSizeFound()){
 					chunkSizeStr.append((char)data[i]);
@@ -87,9 +90,9 @@ public class ModReader {
 				}
 				else{
 					toWrite[c] = data[i];
-					incChunkReadSoFar();
-					c++;
+					incChunkReadSoFar(); 
 					checkChunkReadDone();
+					c++;
 				}
 			}
 			else{
@@ -103,11 +106,8 @@ public class ModReader {
 	public void writeData(byte[] data, int end) throws IOException{
 		if(end + getCfl() > contentLength){
 			end = (int) (contentLength - cfl); //Change ending for us to read the byte file instead of reading till the end, we read till the contentlength
-			out.write(data,0,end);				
 		}
-		else{
-			out.write(data,0,end);
-		}
+		out.write(data,0,end);
 	}
 	public void writeExtraBody(byte[] data, int start, int end) throws IOException{
 		if(getCTE()){
@@ -139,6 +139,8 @@ public class ModReader {
 		return bodyStart;
 	}
 	
+	//End finding
+	
 	
 	//Extraction methods (shit loads of em)
 	//Done when all the header is found
@@ -152,6 +154,7 @@ public class ModReader {
 		setHeaderFound(true);
 	}
 	
+	//Extract the content length for normal downloading
 	public void extractCL(String h){
 		String[] hSplit = h.split("\r\n");
 		for(String s : hSplit){
@@ -162,8 +165,12 @@ public class ModReader {
 		}	
 		System.out.println("Content Length: " + contentLength);
 	}
+	
+	//Extract the chuncksize
 	public void extractChunkSize(){
 		String cStr = chunkSizeStr.toString();
+		//if the reading of the chunk length is done, convert it to long and set chunkSize
+		//In addition, it also has to check for the ending of the file
 		if(cStr.contains("\r\n")){
 			setChunkSize(convertStringToHexLong(cStr.substring(0, cStr.length()-2)));
 			setChunkSizeFound(true);
@@ -229,6 +236,7 @@ public class ModReader {
 			else if(responseCode >= 500 && responseCode <= 599){
 				System.out.println("The server probably cant find the file or the file has been moved or removed");
 			}
+			//If not sucessful, we exit
 			suddenExit();
 		}
 	}
@@ -252,7 +260,7 @@ public class ModReader {
 		}
 		return getDoneReading();
 	}
-	
+	//Use it for when the server send us unsuccessful response
 	public void suddenExit() throws IOException{
 		deleteFile();
 		close();
@@ -284,6 +292,7 @@ public class ModReader {
 	public void incCP(){
 		cp++;
 	}
+	//Decrementing dontRead
 	public void decDontRead(){
 		dontRead--;
 	}
@@ -295,6 +304,14 @@ public class ModReader {
 	}
 	public void incChunkReadSoFar(){
 		chunkReadSoFar++;
+	}
+	
+	//Print method, this is just used to print to progress for every 10% to the user.
+	public void printMileStone(){
+		if((float)getCfl()/(float)getCL() * 100 > progress[getCP()] ){
+			System.out.println("Downloading: " + progress[getCP()] + "%");
+			incCP();
+		}
 	}
 	
 	//Set methods
@@ -344,13 +361,6 @@ public class ModReader {
 		contentLength = Integer.MAX_VALUE;
 	}
 	
-	//Print method, this is just used to print to progress for every 10% to the user.
-	public void printMileStone(){
-		if((float)getCfl()/(float)getCL() * 100 > progress[getCP()] ){
-			System.out.println("Downloading: " + progress[getCP()] + "%");
-			incCP();
-		}
-	}
 	
 	//Get method start here
 	public boolean getCTE(){
