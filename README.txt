@@ -16,3 +16,6 @@ Although if you don’t put http the program will complain.
 
 The chunk encoding part may be a bit bugging since i have no way to check it.
 Apologies
+
+In addition, if i detect any error while downloading, I will delete the file.
+(may change it later)
