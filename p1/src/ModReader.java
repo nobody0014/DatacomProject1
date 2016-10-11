@@ -79,7 +79,7 @@ public class ModReader {
 	public void writeCTE(byte[] data, int start, int end) throws IOException{
 		//The counter that keeps how much of toWrite we have to write into the file.
 		int c = 0;
-		//Create a tempt static byte array to keep bytes that should be written inside
+		//Create a tempt static byte array to keep bytes that should be written into the file
 		byte[] toWrite = new byte[8192];
 		for(int i = start; i < end; i++){
 			//dontRead is a variable asking you to not read this byte.
@@ -99,7 +99,8 @@ public class ModReader {
 				decDontRead();
 			}
 		}	
-		out.write(data,c,end-start);
+		//We know that toWrite contains all the stuff thats needed and that the offset is 0 and the length is c, so yup
+		out.write(toWrite,0,c);
 	}
 	//I got tired of making big function so i am trying to make it easy to read the big functions
 	//This is only used o write into a file (it assumes we already seperate the header)
@@ -111,11 +112,11 @@ public class ModReader {
 	}
 	public void writeExtraBody(byte[] data, int start, int end) throws IOException{
 		if(getCTE()){
-			writeCTE(data,start, end);
+			writeCTE(data,start, end); //writecte takes the start and the end 
 		}
 		else{
 			//write actually takes in offset and length so ill have to minus to get the length
-			out.write(data, start, end-start);;
+			out.write(data, start, end-start);
 			addCfl(end-start);
 		}
 	}
@@ -224,7 +225,7 @@ public class ModReader {
 			System.out.println("Request has been received and the process is continuing");
 		}
 		else if(responseCode >= 200 && responseCode <= 299){
-			System.out.println("Sucessfully recived by the server, understood and accepted");
+			System.out.println("Request recived by the server, understood and accepted");
 		}
 		else {
 			if(responseCode >= 300 && responseCode <= 399){
