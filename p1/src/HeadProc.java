@@ -14,6 +14,7 @@ public class HeadProc {
 	public String makeDownloadReq(String path, String domain){
 		String req = "GET " + path + " HTTP/1.1" + NL;
 		req += "Host: " + domain  + NL;
+		req += "Connection: close" + NL;
 		return req + NL;
 	}
 }

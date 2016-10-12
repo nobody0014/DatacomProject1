@@ -15,6 +15,8 @@ else
 	javac Downloader.java
 	javac ModReader.java
 	javac HeadProc.java
+	javac ProcessNormal.java
+	javac ProcessCTE.java
 	echo “Running the program…”
 	java srget $@
 	echo “Finished running the program…”
