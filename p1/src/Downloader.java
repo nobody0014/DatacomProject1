@@ -1,4 +1,3 @@
-import java.util.*;
 import java.io.*;
 import java.net.*;
 
@@ -54,10 +53,12 @@ public class Downloader {
 				currentByte = in.read(currentData);
 			}catch(Exception e){
 				System.out.println("Possible timeout from the server");
+				mod.writeError();
 				break;
 			}
 			if(currentByte == -1){
-				System.out.println("Possible disconnection from the server");
+				if(mod.getError()){System.out.println(mod.getErrorMsg());;}
+				else{System.out.println("Possible disconnection from the server");}
 				break;
 			}
 			if(mod.writeIntoFile(currentData, currentByte)){

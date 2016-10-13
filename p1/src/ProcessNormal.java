@@ -7,6 +7,7 @@ public class ProcessNormal {
 	Charset c = Charset.forName("US-ASCII"); 
 	String errorMsg;
 	StringBuilder header;
+	String headerStr;
 	ProcessCTE cte;
 	
 	boolean isCTE; //To check if the file transfer is CTE
@@ -26,6 +27,7 @@ public class ProcessNormal {
 	//Contructor
 	public ProcessNormal(){
 		errorMsg = new String();
+		headerStr = new String();
 		header = new StringBuilder();
 		setError(false);
 		setCTE(false);
@@ -147,6 +149,7 @@ public class ProcessNormal {
 			//These following lines are used to take out the header and extract contentLength
 			//split[0] is the whole headers lines, split[1] is the body part 
 			String[] split = tempth.split("\r\n\r\n");
+			setHeader(tempth);
 			checkResponse(split[0]);
 			extractHeader(split[0]);
 			setHeaderFound(true);
@@ -209,11 +212,15 @@ public class ProcessNormal {
 	//Add method start here
 	//Add to the current file length, we dont really want to use f.length
 	public void addCfl(int l){
-		cfl += l;
+		if(getCL() != 0){
+			cfl += l;
+		}
 	}
 	//just in case, most likely wont happen
 	public void addCfl(long l){
-		cfl += l;
+		if(getCL() != 0){
+			cfl += l;
+		}
 	}
 	//Increment cp, cp is what we used to track the progress of the download
 	public void incCP(){
@@ -246,6 +253,9 @@ public class ProcessNormal {
 	}
 	public void setCLExist(boolean b){
 		clExist = b;
+	}
+	public void setHeader(String s){
+		headerStr = s;
 	}
 	
 	
@@ -290,5 +300,8 @@ public class ProcessNormal {
 	}
 	public boolean getCLExist(){
 		return clExist;
+	}
+	public String getHeader(){
+		return headerStr;
 	}
 }
