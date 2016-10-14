@@ -42,10 +42,11 @@ public class ProcessNormal {
 	public byte[] process(byte[] data, int end) throws IOException{
 		if(getCTE()){
 			data = cte.processCTE(data,0,end);
-			checkEnd();
 		}else{
 			data  = processNormal(data,end);
 		}
+		addCfl(data.length);
+		checkEnd();
 		return data;
 	}
 	
@@ -58,9 +59,7 @@ public class ProcessNormal {
 		else{
 			data = processData(data,end);
 			if(getCLExist()){
-				addCfl(end);
 				printProgress();
-				checkEnd();
 			}
 		}
 		return data;
@@ -80,7 +79,6 @@ public class ProcessNormal {
 		else{
 			//write actually takes in offset and length so ill have to minus to get the length
 			data = Arrays.copyOfRange(data, start, end);
-			addCfl(end-start);
 		}
 		return data;
 	}
@@ -125,7 +123,7 @@ public class ProcessNormal {
 		for(String s : hSplit){
 			if(s.contains("Content-Length")){
 				String[] cl = s.split(":");
-				setCL(Long.parseLong(cl[1].trim()));
+				setCL(Long.parseLong(cl[1].trim()) + getCfl());
 				setCLExist(true);
 			}
 		}
@@ -149,7 +147,7 @@ public class ProcessNormal {
 			//These following lines are used to take out the header and extract contentLength
 			//split[0] is the whole headers lines, split[1] is the body part 
 			String[] split = tempth.split("\r\n\r\n");
-			setHeader(tempth);
+			setHeader(split[0]);
 			checkResponse(split[0]);
 			extractHeader(split[0]);
 			setHeaderFound(true);
@@ -161,21 +159,14 @@ public class ProcessNormal {
 		return data;
 	}
 	
-	private void checkResponse(String h) throws IOException{
+	private void checkResponse(String h){
 		String[] headers = h.split("\r\n");
-		checkError(headers[0]);
+		setError(checkError(headers[0]));
 	}
 	
-	private void checkError(String response) throws IOException{
+	public boolean checkError(String response){
 		int responseCode = Integer.parseInt(response.split(" ")[1]);
-		if(responseCode >= 100 && responseCode <= 199){
-			System.out.println("Request has been received and the process is continuing");
-		}
-		else if(responseCode >= 200 && responseCode <= 299){
-			System.out.println("Request recived by the server, understood and accepted");
-		}
-		else {
-			setError(true);
+		if(responseCode >= 300 && responseCode <= 600) {
 			if(responseCode >= 300 && responseCode <= 399){
 				setErrorMsg("The file requested has been either redirected and since the client is not programmed to handle it yet we will quit");
 			}
@@ -185,12 +176,23 @@ public class ProcessNormal {
 			else if(responseCode >= 500 && responseCode <= 599){
 				setErrorMsg("The server probably cant find the file or the file has been moved or removed");
 			}
+			return true;
 		}
+		return false;
 	}
 	
 	
 	private void printProgress(){
+//		for(int i = 0; i < 101; i++) {
+//		      try{
+//		        Thread.sleep(100);
+//		      }catch (Exception ex){
+//		        ex.printStackTrace();
+//		      }
+//		      System.out.printf("%s \r", Integer.toString(i) + "%");
+//		}
 		float perc = (float)getCfl()/(float)getCL() * 100 ;
+		
 		if(perc >= progress[getCP()]){
 			String progress = "Progress: " + (int) perc + "%";
 			System.out.println(progress);
@@ -204,7 +206,7 @@ public class ProcessNormal {
 		if(getCTE()){
 			setDoneReading(cte.getDoneReading());
 		}
-		else if(getCfl() >= getCL()){
+		else if(getCLExist() && getCfl() >= getCL()){
 			setDoneReading(true);
 		}
 	}
@@ -257,6 +259,9 @@ public class ProcessNormal {
 	public void setHeader(String s){
 		headerStr = s;
 	}
+	public void setCfl(String s){
+		cfl = Long.parseLong(s.trim());
+	}
 	
 	
 	//Set default methods are used to initialised certain global variables
@@ -304,4 +309,5 @@ public class ProcessNormal {
 	public String getHeader(){
 		return headerStr;
 	}
+
 }
