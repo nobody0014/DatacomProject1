@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.*;
 public class srget {
 	public static void main(String[] args) throws IOException{
 //		System.out.println(Arrays.toString(args));

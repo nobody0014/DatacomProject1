@@ -149,6 +149,10 @@ public class ModReader {
 				foundNewCL = true;
 			}
 		}
+		
+		//First we check  both ETags 
+		//Second, if we wasnt able to find both ETags we resort to Last-Modified 
+		//Pretty much if u was not able to find Both ETags and Last-Modifieds then we go and check with CL
 		if(norm.checkError(oldHead[0])){
 			setByteStart("0");
 			r = false;
@@ -156,10 +160,10 @@ public class ModReader {
 		else if((foundOldETag && foundNewETag) && (newETag.equals(oldETag))){
 			r = true;
 		}
-		else if((foundOldDate && foundNewDate) && (newDate.equals(oldDate))) {
+		else if(!(foundOldETag && foundNewETag) && (foundOldDate && foundNewDate) && (newDate.equals(oldDate))) {
 			r = true;
 		}
-		else if((foundOldCL && foundNewCL) && (newCL.equals(oldCL))) {
+		else if(!(foundOldETag && foundNewETag) && !(foundOldDate && foundNewDate) && (foundOldCL && foundNewCL) && (newCL.equals(oldCL))) {
 			r = true;
 		}
 		return r;

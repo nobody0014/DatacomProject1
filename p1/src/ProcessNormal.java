@@ -23,7 +23,6 @@ public class ProcessNormal {
 	long[] progress = {10,20,30,40,50,60,70,80,90,100}; // --> this is used in conjuncture with the cp
 	
 	
-	
 	//Contructor
 	public ProcessNormal(){
 		errorMsg = new String();
@@ -182,23 +181,6 @@ public class ProcessNormal {
 	}
 	
 	
-	private void printProgress(){
-//		for(int i = 0; i < 101; i++) {
-//		      try{
-//		        Thread.sleep(100);
-//		      }catch (Exception ex){
-//		        ex.printStackTrace();
-//		      }
-//		      System.out.printf("%s \r", Integer.toString(i) + "%");
-//		}
-		float perc = (float)getCfl()/(float)getCL() * 100 ;
-		
-		if(perc >= progress[getCP()]){
-			String progress = "Progress: " + (int) perc + "%";
-			System.out.println(progress);
-			incCP();
-		}
-	}
 	
 	//We always let content length be max vlue first until we discover 
 	//the contentLength sent back form the header or the file ends with /r/n/r/n
@@ -308,6 +290,11 @@ public class ProcessNormal {
 	}
 	public String getHeader(){
 		return headerStr;
+	}
+	
+	private void printProgress(){
+		long perc = getCfl() * 100 /getCL() ;
+		System.out.printf("%s \r", perc + "%");
 	}
 
 }
