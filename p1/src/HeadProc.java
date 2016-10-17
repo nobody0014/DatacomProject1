@@ -8,7 +8,7 @@ public class HeadProc {
 		return new URL(servName);
 	}
 	
-	
+	//Followings makeDownloadReq makes the GET request
 	public String makeDownloadReq(String path, String domain){
 		String req = "GET " + path + " HTTP/1.1" + NL;
 		req += "Host: " + domain  + NL;
@@ -23,9 +23,15 @@ public class HeadProc {
 		req += "Range: bytes=" + startByte + "-"  + NL;
 		return req + NL;
 	}
+	public String makeDownloadReq(String path, String domain,String startByte, String endByte){
+		String req = "GET " + path + " HTTP/1.1" + NL;
+		req += "Host: " + domain  + NL;
+		req += "Connection: close" + NL;
+		req += "Range: bytes=" + startByte + "-" + endByte  + NL;
+		return req + NL;
+	}
 	
-	
-	//Make head to ask if there is any changes to the file --> for resuming
+	//Make HEAD request that will be used for checking for resumable
 	public String makeHeadReq(String path, String domain){
 		String req = "HEAD " + path + " HTTP/1.1" + NL;
 		req += "Host: " + domain  + NL;

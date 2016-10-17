@@ -7,23 +7,17 @@ public class srget {
 		Downloader d = new Downloader(args[args.length-1],args[1]);
 		
 		System.out.println("Connecting...");
-
 		d.connect();
-
+		System.out.println("Connection established");
 		
 		
-		System.out.println("Sending req");
-		d.sendReq();
+		System.out.println("Sending req...");
+		d.sendReq(); //Check for resumable and set up necessary areas for download
 		System.out.println("Sent req");
 		
 		
-		
-		System.out.println("Reading&Writing Input");
-		d.download(); //This function will both read and then write input immediately
-		System.out.println("Done reading&writing");
-				
-		
-		
+		d.download(false); //tell the program to download the body of the file 
+						
 		d.close();
 	}
 	

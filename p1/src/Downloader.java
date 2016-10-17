@@ -22,24 +22,38 @@ public class Downloader {
 	int port = 80;
 	
 	public Downloader(String host,String fileName) throws IOException{
+		setUpHostInformation(host);
+		setUpFiles(fileName);
+	}
+	//Called to set up anythin host related
+	public void setUpHostInformation(String host){
 		h = new HeadProc();
-		h.procHost(host);
-		hostInfo = h.procHost(host);
-		fn = fileName;
+		try{
+			h.procHost(host);
+			hostInfo = h.procHost(host);
+		}catch (Exception e){
+			System.out.println("Unaccetable host, Quiting program");
+			System.exit(0);
+		}
 		domain = hostInfo.getHost();
-		if( hostInfo.getPath() == null || hostInfo.getPath().equals("")){path = "/";}
+		if(hostInfo.getPath() == null || hostInfo.getPath().equals("")){path = "/";}
 		else{path = hostInfo.getPath();}
-		if(hostInfo.getPort() != -1){port  = hostInfo.getPort();}
+		if(hostInfo.getPort() != -1){port = hostInfo.getPort();}
+	}
+	//Called during the constructor, set up necesarry file infomation and set if the file is resumable
+	public void setUpFiles(String fileName){
+		fn = fileName;
 		mod = new ModReader(fn);
 		mod.createFile();
 		setResume(mod.checkDoResume());
-		
 	}
 	
+	//This sendReq will have to check if the file is resumable,else it will call sendReq(req)
 	public void sendReq() throws IOException{
 		if(isResume()){doResumeProcess();}
 		else{sendReq(h.makeDownloadReq(path, domain));}
 	}
+	//Simple sending request that was made by HeadProc
 	public void sendReq(String req) throws IOException{
 		int reqS = req.length();
 		int sent = out.size();
@@ -48,23 +62,22 @@ public class Downloader {
 			sent  = out.size();
 		}
 	}
+	//Do the necessary request for getting information for resumable
 	public void doResumeProcess() throws IOException{
-		System.out.println("Checking Resumable...");
 		String req = h.makeHeadReq(path, domain);
 		sendReq(req);
-		downloadHead();
+		download(true);
 		close();
 		connect();
 		req = h.makeDownloadReq(path, domain,mod.getByteStart());
 		sendReq(req);
-		System.out.println("Finish Downloading...");
 	}
 	
 	
 	//Reading input do 2 things, read the incoming files and writing into another file
 	//Write into other is done by initializing mod and using it
 	//Ending detection and header seperation will be done by mod
-	public void download() throws IOException{
+	public void download(boolean isHead) throws IOException{
 		int currentByte = 0;
 		byte[] currentData = new byte[8192];
 		while(currentByte != -1){
@@ -78,34 +91,9 @@ public class Downloader {
 				else{System.out.println("Possible disconnection from the server");}
 				break;
 			}
-			if(mod.writeIntoFile(currentData, currentByte)){
+			if(mod.write(isHead,currentData, currentByte)){
 				if(mod.getError()){System.out.println(mod.getErrorMsg());}
 				else{System.out.println("Finish Downloading");}
-				break;
-			}
-		}
-	}
-	public void downloadHead() throws IOException{
-		int currentByte = 0;
-		byte[] currentData = new byte[8192];
-		while(currentByte != -1){
-			try{
-				currentByte = in.read(currentData);
-			}catch(Exception e){
-				System.out.println("Possible timeout from the server");
-				break;
-			}
-			if(currentByte == -1){
-				System.out.println("Possible disconnection from server");
-				break;
-			}
-			if(mod.writeHead(currentData, currentByte)){
-				if(mod.getError()){
-					System.out.println(mod.getErrorMsg());
-				}
-				else{
-					System.out.println("Finish Checking Resume");
-				}
 				break;
 			}
 		}

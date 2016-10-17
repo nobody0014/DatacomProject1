@@ -28,9 +28,9 @@ public class ModReader {
 		CLExist = false;
 		norm = new ProcessNormal();
 	}
-	public ModReader(){
-		CLExist = false;
-		norm = new ProcessNormal();
+	public boolean write(boolean isHead,byte[] data, int end) throws IOException{
+		if(isHead){return writeHead(data,end);}
+		else{return writeIntoFile(data,end);}
 	}
 	public boolean writeIntoFile(byte[] data, int end) throws IOException{
 		boolean stop = true;
@@ -201,9 +201,7 @@ public class ModReader {
 			deleteMetaFile();
 		}
 	}
-	public void renameFinalFile(){
-		f.renameTo(new File(fn.substring(0, fn.length()-10)));
-	}
+	
 	
 	public void rafWrite(byte[] data, long startFile, RandomAccessFile r){
 		try{
@@ -239,6 +237,9 @@ public class ModReader {
 		catch(Exception e){
 			System.out.println("Apparently the file is not created yet");
 		}
+	}
+	public void renameFinalFile(){
+		f.renameTo(new File(fn.substring(0, fn.length()-10)));
 	}
 	public void deleteMetaFile(){
 		m.delete();
