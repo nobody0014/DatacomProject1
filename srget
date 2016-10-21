@@ -12,9 +12,12 @@ else
 	cd p1/src
 	echo “Compiling…”
 	javac srget.java
-	javac Downloader.java
-	javac ModReader.java
+	javac ResumableChecker.java
+	javac MasterThread.java
+	javac WorkerThread.java
+	javac ExtendedThreadPool.java
 	javac HeadProc.java
+	javac Processor.java
 	javac ProcessNormal.java
 	javac ProcessCTE.java
 	echo “Running the program…”
