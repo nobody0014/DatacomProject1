@@ -1,8 +1,11 @@
-Welcome to my first Data Communication Project 1
+Welcome to my Data Communication Project 1
 Progress:
+
+(Read the details for more info on certain checkpoints)
+
 Checkpoint 1: Over
 Checkpoint 2: Over
-Checkpoint 3: Over, Redirection buggy as hell
+Checkpoint 3: Over
 
 Checkpoint 1: 
 Status:
