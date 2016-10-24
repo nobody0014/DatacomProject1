@@ -23,6 +23,11 @@ The chunk encoding part may be a bit bugging since i have no way to check it.
 Apologies
 If there is no content length given, program will still work (maybe buggy, no test).
 
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+
 Checkpoint 2:
 Firstly, the chunk encoding and no CL(this one has no test) part may still be buggy.
 Secondly, the GET request and HEAD request we send no longer ask for 
@@ -69,6 +74,9 @@ I hate writing this code very very much (it’s ugly), ill try to change later.
 To Use: Same thing as last check point
 
 
+————————————————————————————————————————————————————————————————————————————————————————
+
+
 Checkpoint 3:
 
 To Do’s:
@@ -77,7 +85,7 @@ To Do’s:
 
 Progress:
 1) Done (some trivial case problem,e.g: empty META file case)
-2) Not Done yet
+2) Done (not fully tested, no time, i got 4 exams coming, checked with twice redirection link)
 
 How concurrent was done (assuming we all check for content length):
 1) Cut files into same size chunk except the last chunk
@@ -101,6 +109,10 @@ Note:
 2) We do support different thread pool size resumable.
 3) WARNING: sometimes, writing meta file will throw out exception since the chunk array is being used for iterating (for writing error) and removing (by threads). We will just not write into META file if they are being used for removing threads.
 
+Bugs:
+1) We do support resume
+2) We do not know how good this is slow internet. (e.g. when certain chunk doesn’t download successfully and so we add it back into holder to be made into another job to be executed again) but going by logic and design, it should work.
+3) Probably mentioned above but there may be case of buggy meta file.
 
-
+————————————————————————————————————————————————————————————————————————————————————————
 

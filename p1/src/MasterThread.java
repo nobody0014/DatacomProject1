@@ -122,8 +122,47 @@ public class MasterThread {
 		connectToHost();
 		rc.downloadResumeHead(client, in, out, HeadProc.makeHeadReq(path, domain));
 		closeConnection();
+		if(checkFileMoved()){
+			searchCorrectUrl(0);
+		}
 		rc.checkDownloadType();
 		rc.checkDoResume();
+	}
+	public boolean checkFileMoved(){
+		String error = HeadProc.checkError(rc.getHead());
+		if(error != null && error.contains("3")){
+			return true;
+		}
+		return false;
+	}
+	private void searchCorrectUrl(int timeSearched){
+		if(timeSearched < 6){
+			String newUrl = extractLocation(rc.getHead());
+			setUpHostInformation(newUrl);
+			if(!newUrl.equals("")){
+				connectToHost();
+				rc.resetHead();
+				rc.downloadResumeHead(client, in, out, HeadProc.makeHeadReq(path, domain));
+				closeConnection();
+				if(checkFileMoved()){
+					searchCorrectUrl(timeSearched+1);
+				}
+			}
+		}
+		else{
+			System.out.println("Cant search for the url, quiting the program");
+			System.exit(0);
+		}
+	}
+	private String extractLocation(String headers){
+		String[] h = headers.split("\r\n");
+		String newUrl = "";
+		for(String s : h){
+			if(s.contains("Location")){
+				newUrl = s.split(": ")[1];
+			}
+		}
+		return newUrl;
 	}
 	
 	public void setUpChunks(){

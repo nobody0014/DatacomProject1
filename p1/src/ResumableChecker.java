@@ -163,9 +163,10 @@ public class ResumableChecker {
 			stop = true;
 			resumeHead = resumeHead.split("\r\n\r\n")[0] + "\r\n\r\n";
 		}
-	
 		return stop;
 	}
+	
+	
 	
 	//check if we can resume
 	private boolean processResumeHead() {
@@ -247,7 +248,10 @@ public class ResumableChecker {
 	private String[] splitHead(String head, String regex){
 		return head.split(regex);
 	}
-
+	
+	public void resetHead(){
+		resumeHead = "";
+	}
 	
 	public boolean contentLengthExists(){
 		return clExists;

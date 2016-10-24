@@ -44,13 +44,13 @@ public class HeadProc {
 		if(responseCode >= 300 && responseCode <= 600) {
 			String errorMsg = "";
 			if(responseCode >= 300 && responseCode <= 399){
-				errorMsg = "The file requested has been either redirected and since the client is not programmed to handle it yet we will quit";
+				errorMsg = "3:The file requested has been redirected";
 			}
 			else if(responseCode >= 400 && responseCode <= 499){
-				errorMsg = "The request contains incorrect syntax or the the file name was incorrect";
+				errorMsg = "4:The request contains incorrect syntax or the the file name was incorrect";
 			}
 			else if(responseCode >= 500 && responseCode <= 599){
-				errorMsg = "The server probably cant find the file or the file has been moved or removed";
+				errorMsg = "5:The server probably cant find the file or the file has been moved or removed";
 			}
 			return errorMsg;
 		}
