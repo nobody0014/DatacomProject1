@@ -17,7 +17,33 @@ public class FileWriter {
 			System.out.println("Writing failed" );
 		}
 	}
+	public void write(byte[] data, long start){
+		try{
+			raf.seek(start);
+			raf.write(data);
+		}catch(Exception e){
+			System.out.println("Writing failed" );
+		}
+	}
 	public void write(byte[] data, int start, int end){
+		try{
+			raf.seek(start);
+			raf.setLength(raf.length() + end);
+			raf.write(data);
+		}catch(Exception e){
+			System.out.println("Writing failed" );
+		}
+	}
+	public void write(byte[] data, long start, long end){
+		try{
+			raf.seek(start);
+			raf.setLength(raf.length() + end);
+			raf.write(data);
+		}catch(Exception e){
+			System.out.println("Writing failed" );
+		}
+	}
+	public void write(byte[] data, int start, long end){
 		try{
 			raf.seek(start);
 			raf.setLength(raf.length() + end);
@@ -37,31 +63,35 @@ public class FileWriter {
 		}
 	}
 	public void writeError(ArrayList<String> chunks, int startByte){
+		String s = arraysToString(chunks);
 		try{
-			String s = arraysToString(chunks);
 			raf.setLength(startByte  + s.getBytes().length);
 			raf.seek(startByte);
 			raf.write(s.getBytes());
 		}catch(Exception e){
-			System.out.println("Writing failed" );
+			System.out.println("Writing Error failed" );
 		}
 	}
-	public void writeError(ArrayList<String> chunks, long startByte){
+	public void writeError(ArrayList<String> chunks, long startByte) {
+		String s = arraysToString(chunks);
 		try{
-			String s = arraysToString(chunks);
 			raf.setLength(startByte  + s.getBytes().length);
 			raf.seek(startByte);
 			raf.write(s.getBytes());
 		}catch(Exception e){
-			System.out.println("Writing failed" );
+			System.out.println("Writing Error failed" );
 		}
 	}
+		
 	public String arraysToString(ArrayList<String> chunks){
 		StringBuilder s = new StringBuilder();
-		for(String c : chunks){
-			s.append(new String(c + " "));
-		}
-		return s.toString();
+		try{
+			for(String c : chunks){
+				s.append(new String(c + " "));
+			}
+		}catch(Exception e){}//Do nothin, error caused by iterating while trying to delete stuff, basically threads clashing}
+		
+		return s.substring(0, s.length()-1);
 	}
 	
 	private void createRandomAccessFile(){

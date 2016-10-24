@@ -1,8 +1,7 @@
 import java.io.*;
-import java.util.concurrent.*;
 
 public class srget {
-	public static void main(String[] args) throws IOException{
+	public static void main(String[] args) throws IOException, InterruptedException{
 		
 		int connections = checkArgs(args);
 		System.out.println("Creating the Master Thread...");
@@ -27,11 +26,21 @@ public class srget {
 			if(args[2].equals("-c") && args.length == 4){
 				return 5;
 			}
-			if(args[2].equals("-c") && args.length == 5){
-				return Integer.parseInt(args[4]);
+			else if(args[2].equals("-c") && args.length == 5){
+				try{
+					return Integer.parseInt(args[3]);
+				}
+				catch (Exception e){
+					System.out.println("Worker number is not an integer, setting the number to default");
+					return 5;
+				}
+			}
+			else{
+				System.out.println("Invalid Parameters");
+				System.exit(0);
 			}
 		}
 		
-		return 1;
+		return 5;
 	}
 }

@@ -17,6 +17,7 @@ public class ResumableChecker {
 	private boolean isCTE;
 	private boolean rangeFound;
 	
+	private long totalChunks;
 	private long chunkSize;
 	private long contentLength;
 	
@@ -28,15 +29,25 @@ public class ResumableChecker {
 	
 	public ArrayList<String> getChunk(int connection_numbers){
 		ArrayList<String> chunks;
-		if(isResumable()){
+		if(doResumable()){
 			String chunkString = splitHead(resumeFile, "\r\n\r\n")[1];
-			chunks = (ArrayList<String>) Arrays.asList(splitHead(chunkString," "));
-			chunkSize = Long.parseLong(chunks.get(chunks.size()-1));
+			chunks = transForm(splitHead(chunkString," "));
+			chunkSize = Long.parseLong(chunks.get(chunks.size()-2));
+			totalChunks = Long.parseLong(chunks.get(chunks.size()-1));
 		}
 		else{
 			chunks = splitFileChunks(connection_numbers);
+			totalChunks = getContentLength()/getChunkSize()+1;
 		}
+		
 		return chunks;
+	}
+	private ArrayList<String> transForm(String[] chunks){
+		ArrayList<String> c = new ArrayList<>();
+		for(int i = 0; i < chunks.length;i++){
+			c.add(chunks[i]);
+		}
+		return c;
 	}
 	private ArrayList<String> splitFileChunks(int cn){
 		ArrayList<String> chunks = new ArrayList<>();
@@ -46,13 +57,11 @@ public class ResumableChecker {
 		else{
 			chunkSize = 1000000;
 		}
-		for(int i = 0; i < contentLength/chunkSize;i++){
-			chunks.add(new String("C" + 1));
-		}
-		if(contentLength%chunkSize != 0){
-			chunks.add(new String("C" +(contentLength/chunkSize +1)));
+		for(int i = 0; i < contentLength/chunkSize + 1;i++){
+			chunks.add("C" + i);
 		}
 		chunks.add(String.valueOf(chunkSize));
+		chunks.add(String.valueOf(chunks.size()-1));
 		return chunks;
 	}
 	
@@ -61,7 +70,7 @@ public class ResumableChecker {
 		f = new File(fn);
 		m = new File(mn);
 		if(f.isFile() && m.isFile()){
-			filesExist =  true;
+			filesExist =  true;	
 		}
 		else{
 			f.delete();
@@ -72,7 +81,7 @@ public class ResumableChecker {
 	}
 	
 	public void checkDoResume(){
-		if(checkFileExists()){
+		if(checkFileExists() && isResumable()){
 			openResumeFile();
 			sameHead = processResumeHead();
 		}
@@ -110,10 +119,14 @@ public class ResumableChecker {
 			int currentByte = 0;
 			while(currentByte != -1){
 				currentByte = fis.read(data);
-				resumeFile += new String(Arrays.copyOfRange(data, 0, currentByte), "UTF-8"); 
+				if(currentByte != -1){
+					resumeFile += new String(Arrays.copyOfRange(data, 0, currentByte), "UTF-8"); 
+				}
+				else{break;}
 				data = new byte[8192];
 			}
 			fis.close();
+
 		}
 		catch(Exception e){
 			System.out.println("Can't get Meta file even though the Meta file exists, possible corruption, will do redownloading");
@@ -139,6 +152,7 @@ public class ResumableChecker {
 				System.out.println("Possible timeout from the server");
 				break;
 			}
+			
 			if(writeHead(currentData,currentByte)){break;}
 		}
 	}
@@ -147,7 +161,9 @@ public class ResumableChecker {
 		resumeHead += new String(Arrays.copyOfRange(data, 0, end));
 		if(resumeHead.contains("\r\n\r\n")){
 			stop = true;
+			resumeHead = resumeHead.split("\r\n\r\n")[0] + "\r\n\r\n";
 		}
+	
 		return stop;
 	}
 	
@@ -233,7 +249,9 @@ public class ResumableChecker {
 	}
 
 	
-	
+	public boolean contentLengthExists(){
+		return clExists;
+	}
 	public long getContentLength(){
 		return contentLength;
 	}
@@ -251,5 +269,8 @@ public class ResumableChecker {
 	}
 	public String getHead(){
 		return resumeHead;
+	}
+	public float getTotalChunks(){
+		return totalChunks;
 	}
 }

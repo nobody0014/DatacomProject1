@@ -10,15 +10,16 @@ public class ExtendedThreadPool extends ThreadPoolExecutor {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
 		this.chunkQueue = chunkQueue;
 	}
-	protected void afterExecute(WorkerThread r, Throwable t) {
+	protected void afterExecute(Runnable r, Throwable t) {
      super.afterExecute(r, t);
      if (t == null) {
-    	 chunkQueue.remove(r.getThreadName());
+    	 WorkerThread wt = (WorkerThread) r;
+//    	 System.out.println(chunkQueue.toString());
+    	 chunkQueue.remove(wt.getThreadName());
      }
      else{
-    	 this.getQueue().add(r);
+    	 this.execute(r);
      }
    }
-	
 
 }

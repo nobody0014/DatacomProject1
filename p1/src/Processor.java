@@ -52,11 +52,7 @@ public abstract class Processor {
 	private int findBody(String tempth, String headers, byte[] data, int end){
 		int diff = tempth.getBytes(c).length - headers.getBytes(c).length;
 		int bodyStart = end - diff;
-		for(int i = bodyStart; i < data.length; i++){
-			if(data[i] == 13 || data[i] == 10){bodyStart++;}
-			else{break;}
-		}
-		return bodyStart;
+		return bodyStart+4;
 	}
 	
 	

@@ -16,18 +16,11 @@ public class HeadProc {
 		return req + NL;
 	}
 	
-	public static String makeDownloadReq(String path, String domain,String startByte){
+	public static String makeDownloadReq(String path, String domain,long startByte){
 		String req = "GET " + path + " HTTP/1.1" + NL;
 		req += "Host: " + domain  + NL;
 		req += "Connection: close" + NL;
-		req += "Range: bytes=" + startByte + "-"  + NL;
-		return req + NL;
-	}
-	public static String makeDownloadReq(String path, String domain,String startByte, String endByte){
-		String req = "GET " + path + " HTTP/1.1" + NL;
-		req += "Host: " + domain  + NL;
-		req += "Connection: close" + NL;
-		req += "Range: bytes=" + startByte + "-" + endByte  + NL;
+		req += "Range: bytes=" + startByte + "-"+ NL;
 		return req + NL;
 	}
 	public static String makeDownloadReq(String path, String domain,long startByte, long endByte){
