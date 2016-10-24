@@ -7,6 +7,7 @@ public class MasterThread {
 	
 	private int number_of_workers;
 	private ArrayList<String> chunkQueue; 
+	private ArrayList<String> chunkInfor;
 	
 	private ResumableChecker rc;
 		
@@ -25,6 +26,7 @@ public class MasterThread {
 	
 	private long headSize;
 	private boolean headWritten;
+	
 	
 	public MasterThread(String host,String fileName,int wn) {
 		setUpHostInformation(host);
@@ -53,21 +55,20 @@ public class MasterThread {
 			System.out.println("Download Type is not resumable, setting number of workers to 1");
 			number_of_workers = 1;
 		}
-		Queue<Runnable> jobQueue = createJobs();
-		ExtendedThreadPool exe = new ExtendedThreadPool(number_of_workers, number_of_workers, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(jobQueue.size()),chunkQueue);		
-		for(Runnable r : jobQueue){
-			exe.execute(r);
-			while(exe.getActiveCount() == exe.getMaximumPoolSize()){
-				if(rc.isResumable()){editMetaFile();}
-				printProgress();
+		ArrayList<String> holder = new ArrayList<>();
+		for(String s: chunkQueue){holder.add(s);}
+		ExtendedThreadPool exe = new ExtendedThreadPool(number_of_workers, number_of_workers, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(chunkQueue.size()),chunkQueue,holder);		
+		while(!holder.isEmpty() || exe.getActiveCount()>0){
+			if(!holder.isEmpty()){
+				exe.execute(createJob(holder.get(0)));
+				holder.remove(0);
 			}
+			while(exe.getActiveCount() == exe.getMaximumPoolSize()){
+				if(rc.isResumable()){printProgress();editMetaFile();}
+			}
+			while(holder.isEmpty() && exe.getActiveCount()>0){if(rc.isResumable()){printProgress();editMetaFile();}}
 		}
 		exe.shutdown();
-		while(!exe.isTerminated()){
-			if(rc.isResumable())
-				{editMetaFile();}
-			printProgress();
-		}
 		completeTheDownload();
 		System.out.println("Finish Renaming file");
 	}
@@ -82,17 +83,15 @@ public class MasterThread {
 		f.renameTo(new File(fn));
 		f.delete();
 	}
-	
-	public BlockingQueue<Runnable> createJobs(){
-		String downloadingFileName = fn + "CRDOWNLOAD";
-		int chunkSize = Integer.parseInt(chunkQueue.get(chunkQueue.size()-2));
-		BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(chunkQueue.size());
-		for(int i = 0; i < chunkQueue.size()-3; i++){
-			Runnable worker = new WorkerThread(chunkSize*i, chunkSize,downloadingFileName,domain,path,port,chunkQueue.get(i));
-			workQueue.add(worker);
+	public Runnable createJob(String s){
+		int chunkSize = Integer.parseInt(chunkInfor.get(0));
+		int chunkNum = Integer.parseInt(s.substring(1,s.length()));
+		if(chunkNum < rc.getContentLength()/rc.getChunkSize() + 1){
+			return new WorkerThread(chunkNum*chunkSize,chunkSize,fn + "CRDOWNLOAD",domain,path,port,s);
 		}
-		workQueue.add(new WorkerThread( chunkSize * (chunkQueue.size()-3),downloadingFileName,domain,path,port,"C" + (chunkQueue.size()-3)));
-		return workQueue;
+		else{
+			return new WorkerThread(chunkNum*chunkSize,fn + "CRDOWNLOAD",domain,path,port,s);
+		}	
 	}
 	public void createMetaFile(){
 		if(!headWritten){
@@ -104,10 +103,8 @@ public class MasterThread {
 		headSize = rc.getHead().getBytes().length;
 	}
 	public void editMetaFile(){
-		mw.writeError(chunkQueue, headSize);
+		mw.writeError(chunkQueue, chunkInfor,headSize);
 	}
-	
-	
 	public void setUpHostInformation(String host){
 		try{
 			hostInfo = HeadProc.procHost(host);
@@ -131,9 +128,22 @@ public class MasterThread {
 	
 	public void setUpChunks(){
 		chunkQueue = rc.getChunk(number_of_workers);
+		chunkInfor = new ArrayList<String>();
+		chunkInfor.add(chunkQueue.get(chunkQueue.size()-2));
+		chunkInfor.add(chunkQueue.get(chunkQueue.size()-1));
+		chunkQueue.remove(chunkQueue.size()-1);
+		chunkQueue.remove(chunkQueue.size()-1);
 	}
 	public void printProgress(){
-		if(rc.contentLengthExists()){System.out.printf("%s \r", (((rc.getTotalChunks()-chunkQueue.size()+1)/(float)rc.getTotalChunks())*100) + "%");}
+		if(rc.contentLengthExists()){
+			String toPrint = (((rc.getTotalChunks()-chunkQueue.size())/(float)rc.getTotalChunks())*100) + "";
+			if(toPrint.length() > 4){
+				System.out.printf("%s \r", toPrint.substring(0, 4) + "%");
+			}
+			else{
+				System.out.printf("%s \r", toPrint + "%");
+			}
+		}
 	}
 	
 	public void connectToHost(){

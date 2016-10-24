@@ -57,6 +57,7 @@ public class ResumableChecker {
 		else{
 			chunkSize = 1000000;
 		}
+		
 		for(int i = 0; i < contentLength/chunkSize + 1;i++){
 			chunks.add("C" + i);
 		}
@@ -149,10 +150,9 @@ public class ResumableChecker {
 		while(currentByte != -1){
 			try{currentByte = in.read(currentData);}
 			catch(Exception e){
-				System.out.println("Possible timeout from the server");
-				break;
+				System.out.println("Possible timeout from the server, quiting...");
+				System.exit(0);
 			}
-			
 			if(writeHead(currentData,currentByte)){break;}
 		}
 	}

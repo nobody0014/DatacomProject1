@@ -2,7 +2,7 @@ Welcome to my first Data Communication Project 1
 Progress:
 Checkpoint 1: Over
 Checkpoint 2: Over
-Checkpoint 3: Currently
+Checkpoint 3: Over, Redirection buggy as hell
 
 Checkpoint 1: 
 Status:
@@ -69,7 +69,37 @@ I hate writing this code very very much (it’s ugly), ill try to change later.
 To Use: Same thing as last check point
 
 
+Checkpoint 3:
 
+To Do’s:
+1)Make concurrent downloading/resumable, as the project described 
+2)Make redirection
+
+Progress:
+1) Done (some trivial case problem,e.g: empty META file case)
+2) Not Done yet
+
+How concurrent was done (assuming we all check for content length):
+1) Cut files into same size chunk except the last chunk
+2) Create bunch of Runnables
+3) Create ThreadPoolExecutors with thread pool of size specified
+4) execute Runnables according to these pools
+5) if pool is full, run while loop till one is available (cus synchronisation too 		hard)
+
+To Use:
+1) Same instructions as checkpoint 2
+	Note!: if you do same instruction as checkpoint 2 and the download supports concurrent we will use default threads of 5 
+
+2) If you add -c into the middle btw the file name and the address, we will do concurrent download for you and the default will be of 5 threads
+
+3) If you add number after -c, we will keep the size of thread pool to that number.
+
+4) If you did not give us number after -c, we will use the default pool size, other than that we give you error
+
+Note:
+1) If you have disconnection during the program, as usual, we quit the program.
+2) We do support different thread pool size resumable.
+3) WARNING: sometimes, writing meta file will throw out exception since the chunk array is being used for iterating (for writing error) and removing (by threads). We will just not write into META file if they are being used for removing threads.
 
 
 

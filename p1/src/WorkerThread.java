@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
+import java.util.concurrent.FutureTask;
 
 public class WorkerThread implements Runnable{
 	private long byteStart;
@@ -8,6 +9,7 @@ public class WorkerThread implements Runnable{
 	private int chunkSize;
 	private boolean isCTE;
 	private boolean contentLengthExists;
+	private boolean errorWhileDownloading;
 	
 	private String request;
 	private String domain;
@@ -25,7 +27,7 @@ public class WorkerThread implements Runnable{
 	private String ThreadName;
 	
 	@Override
-	public void run() {
+	public void run(){
 //		System.out.println("Worker Name: " + ThreadName);
 		setUp();
 //		System.out.println("Finish setting up the work");
@@ -92,11 +94,13 @@ public class WorkerThread implements Runnable{
 		while(true){
 			try{byteRead = in.read(currentData);}
 			catch(Exception e){
-				System.out.println("Possible timeout from the server");
+				System.out.println("Possible timeout from the server, throwing " + ThreadName + " back into the queue");
+				errorWhileDownloading = true;
 				break;
 			}
 			if(dataProcessor.getErrorStatus()){
 				System.out.println(dataProcessor.getErrorMsg());
+				errorWhileDownloading = true;
 				break;
 			}
 			if(byteRead != -1){
@@ -127,7 +131,8 @@ public class WorkerThread implements Runnable{
 				out.write(this.request.getBytes());
 			}
 		}catch(Exception e){
-			System.out.println("Error sending request to the Server");
+			System.out.println("Error sending request to the Server.\nQuiting");
+			System.exit(0);
 		}
 		
 	}
@@ -162,7 +167,7 @@ public class WorkerThread implements Runnable{
 			in.close();
 			out.close();
 		}catch(Exception e){
-			System.out.println("Unable to close clients, ggwp hell is going down");
+			System.out.println("Unable to close clients, ggwp, hell is going down");
 		}
 	}
 	public boolean isCTE(){
@@ -172,5 +177,7 @@ public class WorkerThread implements Runnable{
 	public String getThreadName(){
 		return ThreadName;
 	}
-	
+	public boolean isErrorWhileDownloading(){
+		return errorWhileDownloading;
+	}
 }
